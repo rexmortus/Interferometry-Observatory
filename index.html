@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interferometer Observatory | Quantum Precision Measurement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-panel: #1a1f35;
+            --border-subtle: #2a3550;
+            --border-accent: #3d4d75;
+            
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --laser-green: #4ade80;
+            --laser-glow: #22c55e;
+            --reference-blue: #6366f1;
+            --measurement-orange: #f59e0b;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --warning-yellow: #eab308;
+            
+            --constructive: #10b981;
+            --destructive: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Main Grid Layout */
+        .observatory-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 1fr;
+            grid-template-rows: 60px 1fr 1fr 140px;
+            gap: 12px;
+            padding: 12px;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-panel) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                var(--laser-green) 0%, 
+                var(--accent-cyan) 50%, 
+                var(--reference-blue) 100%);
+            opacity: 0.6;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, var(--laser-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--laser-green);
+            box-shadow: 0 0 12px var(--laser-glow);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 32px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .header-stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .header-stat-label {
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            opacity: 0.6;
+        }
+
+        .header-stat-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Panel Base Styles */
+        .panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .panel-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-panel);
+            color: var(--accent-cyan);
+            border: 1px solid var(--border-accent);
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 16px;
+            position: relative;
+        }
+
+        /* Control Panel */
+        .controls {
+            grid-row: 2 / 4;
+        }
+
+        .mode-selector {
+            margin-bottom: 20px;
+        }
+
+        .mode-button {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mode-button:hover {
+            border-color: var(--border-accent);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .mode-button.active {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(6, 182, 212, 0.1));
+            border-color: var(--laser-green);
+            color: var(--laser-green);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+        }
+
+        .mode-button .mode-wavelength {
+            display: block;
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .control-section {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .control-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .slider-container {
+            position: relative;
+            padding: 8px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-panel);
+            outline: none;
+            -webkit-appearance: none;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--laser-green);
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--laser-glow);
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--laser-green);
+            cursor: pointer;
+            box-shadow: 0 0 12px var(--laser-glow);
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .slider-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* Geometry Display */
+        .geometry-panel {
+            grid-column: 2;
+            grid-row: 2 / 4;
+        }
+
+        /* Oscilloscope */
+        .oscilloscope-panel {
+            grid-column: 3;
+            grid-row: 2 / 4;
+        }
+
+        /* Canvas Styles */
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 4px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-cyan);
+        }
+
+        .stat-card.primary::before {
+            background: var(--laser-green);
+        }
+
+        .stat-card.warning::before {
+            background: var(--warning-yellow);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: block;
+        }
+
+        .stat-unit {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+
+        .stat-subvalue {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        /* Legend */
+        .channel-legend {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 0.7rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1400px) {
+            .observatory-grid {
+                grid-template-columns: 240px 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="observatory-grid">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">
+                <div class="status-indicator"></div>
+                <h1>Interferometer Observatory</h1>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat-item">
+                    <span class="header-stat-label">System</span>
+                    <span class="header-stat-value">ACTIVE</span>
+                </div>
+                <div class="header-stat-item">
+                    <span class="header-stat-label">Precision</span>
+                    <span class="header-stat-value">± 0.01 nm</span>
+                </div>
+                <div class="header-stat-item">
+                    <span class="header-stat-label">Coherence</span>
+                    <span class="header-stat-value">99.8%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="panel controls">
+            <div class="panel-header">
+                <span class="panel-title">System Controls</span>
+            </div>
+            <div class="panel-content">
+                <div class="mode-selector">
+                    <button class="mode-button active" data-mode="optical">
+                        Optical Mode
+                        <span class="mode-wavelength">λ = 550 nm (Visible Green)</span>
+                    </button>
+                    <button class="mode-button" data-mode="ligo">
+                        LIGO Mode
+                        <span class="mode-wavelength">λ = 1064 nm (Near-IR)</span>
+                    </button>
+                    <button class="mode-button" data-mode="quantum">
+                        Quantum Mode
+                        <span class="mode-wavelength">λ = 780 nm (Rb Transition)</span>
+                    </button>
+                </div>
+
+                <div class="control-section">
+                    <label class="control-label">Path Difference Control (ΔL)</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="pathShift" min="-180" max="180" value="0" step="1">
+                        <div class="slider-value" id="sliderValue">0.00 nm</div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <label class="control-label">Beam Intensity</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="intensity" min="0" max="100" value="100" step="1">
+                        <div class="slider-value" id="intensityValue">100%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geometry Display -->
+        <div class="panel geometry-panel">
+            <div class="panel-header">
+                <span class="panel-title">Instrument Geometry</span>
+                <span class="panel-badge">MICHELSON</span>
+            </div>
+            <div class="panel-content">
+                <canvas id="geometryCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Oscilloscope -->
+        <div class="panel oscilloscope-panel">
+            <div class="panel-header">
+                <span class="panel-title">Oscilloscope Trace</span>
+                <span class="panel-badge">3-CHANNEL</span>
+            </div>
+            <div class="panel-content">
+                <div class="channel-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6366f1;"></div>
+                        <span>CH1: Reference</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span>CH2: Measurement</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4ade80;"></div>
+                        <span>CH3: Interference</span>
+                    </div>
+                </div>
+                <canvas id="oscilloscopeCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Path Difference</span>
+                <span class="stat-value" id="pathDiffValue">0.00<span class="stat-unit">nm</span></span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Phase Shift</span>
+                <span class="stat-value" id="phaseValue">0.00<span class="stat-unit">rad</span></span>
+                <div class="stat-subvalue" id="phaseDegrees">0.00°</div>
+            </div>
+            <div class="stat-card primary">
+                <span class="stat-label">Interference Power</span>
+                <span class="stat-value" id="powerValue">100<span class="stat-unit">%</span></span>
+            </div>
+            <div class="stat-card warning">
+                <span class="stat-label">Signal State</span>
+                <span class="stat-value" id="stateValue" style="font-size: 1rem;">CONSTRUCTIVE</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Fringe Visibility</span>
+                <span class="stat-value" id="visibilityValue">100<span class="stat-unit">%</span></span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Coherence Length</span>
+                <span class="stat-value" id="coherenceValue">∞<span class="stat-unit"></span></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const config = {
+            optical: { 
+                wavelength: 550, 
+                unit: 'nm', 
+                name: 'Optical (Visible)',
+                color: '#4ade80'
+            },
+            ligo: { 
+                wavelength: 1064, 
+                unit: 'nm', 
+                name: 'LIGO (Near-IR)',
+                color: '#06b6d4'
+            },
+            quantum: { 
+                wavelength: 780, 
+                unit: 'nm', 
+                name: 'Quantum (Rb)',
+                color: '#ec4899'
+            }
+        };
+
+        // State
+        let currentMode = 'optical';
+        let pathShift = 0;
+        let beamIntensity = 100;
+        let animationTime = 0;
+
+        // Canvas setup
+        const geometryCanvas = document.getElementById('geometryCanvas');
+        const oscilloscopeCanvas = document.getElementById('oscilloscopeCanvas');
+        const gCtx = geometryCanvas.getContext('2d');
+        const oCtx = oscilloscopeCanvas.getContext('2d');
+
+        // Resize canvases
+        function resizeCanvases() {
+            geometryCanvas.width = geometryCanvas.offsetWidth * window.devicePixelRatio;
+            geometryCanvas.height = geometryCanvas.offsetHeight * window.devicePixelRatio;
+            oscilloscopeCanvas.width = oscilloscopeCanvas.offsetWidth * window.devicePixelRatio;
+            oscilloscopeCanvas.height = oscilloscopeCanvas.offsetHeight * window.devicePixelRatio;
+            
+            gCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            oCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        resizeCanvases();
+        window.addEventListener('resize', resizeCanvases);
+
+        // Event listeners
+        document.querySelectorAll('.mode-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                document.querySelectorAll('.mode-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                currentMode = button.dataset.mode;
+            });
+        });
+
+        document.getElementById('pathShift').addEventListener('input', (e) => {
+            pathShift = parseFloat(e.target.value);
+            updateSliderDisplay();
+        });
+
+        document.getElementById('intensity').addEventListener('input', (e) => {
+            beamIntensity = parseFloat(e.target.value);
+            document.getElementById('intensityValue').textContent = `${beamIntensity.toFixed(0)}%`;
+        });
+
+        function updateSliderDisplay() {
+            const actualShift = pathShift * 0.5;
+            document.getElementById('sliderValue').textContent = `${actualShift.toFixed(2)} ${config[currentMode].unit}`;
+        }
+
+        // Drawing utilities
+        function drawGrid(ctx, width, height, color = 'rgba(100, 116, 139, 0.05)') {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            const spacing = 30;
+            
+            for (let x = 0; x < width; x += spacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y < height; y += spacing) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+
+        // Draw Michelson interferometer geometry
+        function drawGeometry() {
+            const width = geometryCanvas.offsetWidth;
+            const height = geometryCanvas.offsetHeight;
+            
+            gCtx.clearRect(0, 0, width, height);
+            
+            // Background grid with measurements
+            const gridSpacing = 40;
+            gCtx.strokeStyle = 'rgba(100, 116, 139, 0.1)';
+            gCtx.lineWidth = 1;
+            
+            // Vertical grid lines
+            for (let x = 0; x < width; x += gridSpacing) {
+                gCtx.beginPath();
+                gCtx.moveTo(x, 0);
+                gCtx.lineTo(x, height);
+                gCtx.stroke();
+            }
+            
+            // Horizontal grid lines
+            for (let y = 0; y < height; y += gridSpacing) {
+                gCtx.beginPath();
+                gCtx.moveTo(0, y);
+                gCtx.lineTo(width, y);
+                gCtx.stroke();
+            }
+            
+            // Draw axes
+            const cx = width / 2;
+            const cy = height / 2;
+            
+            gCtx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+            gCtx.lineWidth = 1;
+            
+            // X-axis
+            gCtx.beginPath();
+            gCtx.moveTo(30, cy);
+            gCtx.lineTo(width - 30, cy);
+            gCtx.stroke();
+            
+            // Y-axis
+            gCtx.beginPath();
+            gCtx.moveTo(cx, 30);
+            gCtx.lineTo(cx, height - 30);
+            gCtx.stroke();
+            
+            // Scale markers and labels
+            gCtx.font = '9px JetBrains Mono';
+            gCtx.fillStyle = '#64748b';
+            gCtx.textAlign = 'center';
+            
+            // X-axis scale (in cm, assuming 1m arms)
+            const scaleStep = gridSpacing * 2;
+            const cmPerStep = 25; // Each step represents 25cm
+            
+            for (let x = cx; x < width - 30; x += scaleStep) {
+                const cm = ((x - cx) / scaleStep) * cmPerStep;
+                gCtx.beginPath();
+                gCtx.moveTo(x, cy - 5);
+                gCtx.lineTo(x, cy + 5);
+                gCtx.stroke();
+                gCtx.fillText(`${cm}cm`, x, cy + 18);
+            }
+            
+            for (let x = cx; x > 30; x -= scaleStep) {
+                const cm = ((cx - x) / scaleStep) * cmPerStep;
+                if (cm === 0) continue;
+                gCtx.beginPath();
+                gCtx.moveTo(x, cy - 5);
+                gCtx.lineTo(x, cy + 5);
+                gCtx.stroke();
+                gCtx.fillText(`-${cm}cm`, x, cy + 18);
+            }
+            
+            // Y-axis scale
+            gCtx.textAlign = 'right';
+            for (let y = cy; y > 30; y -= scaleStep) {
+                const cm = ((cy - y) / scaleStep) * cmPerStep;
+                if (cm === 0) continue;
+                gCtx.beginPath();
+                gCtx.moveTo(cx - 5, y);
+                gCtx.lineTo(cx + 5, y);
+                gCtx.stroke();
+                gCtx.fillText(`${cm}cm`, cx - 10, y + 4);
+            }
+            
+            // Axis labels
+            gCtx.textAlign = 'center';
+            gCtx.fillStyle = '#94a3b8';
+            gCtx.font = '10px JetBrains Mono';
+            gCtx.fillText('Position (cm)', width - 60, cy - 10);
+            
+            gCtx.save();
+            gCtx.translate(cx - 25, 50);
+            gCtx.rotate(-Math.PI / 2);
+            gCtx.fillText('Position (cm)', 0, 0);
+            gCtx.restore();
+            
+            // Reset text align
+            gCtx.textAlign = 'left';
+            
+            const armLength = Math.min(width, height) * 0.35;
+            
+            // Beam splitter (central square)
+            gCtx.strokeStyle = '#3d4d75';
+            gCtx.lineWidth = 3;
+            gCtx.save();
+            gCtx.translate(cx, cy);
+            gCtx.rotate(Math.PI / 4);
+            gCtx.strokeRect(-25, -25, 50, 50);
+            gCtx.restore();
+            
+            // Mirrors
+            gCtx.strokeStyle = '#64748b';
+            gCtx.lineWidth = 4;
+            
+            // Top mirror (reference arm)
+            gCtx.beginPath();
+            gCtx.moveTo(cx - 30, cy - armLength);
+            gCtx.lineTo(cx + 30, cy - armLength);
+            gCtx.stroke();
+            
+            // Right mirror (measurement arm - adjusted by path shift)
+            const shiftOffset = (pathShift / 180) * 60;
+            gCtx.beginPath();
+            gCtx.moveTo(cx + armLength + shiftOffset, cy - 30);
+            gCtx.lineTo(cx + armLength + shiftOffset, cy + 30);
+            gCtx.stroke();
+            
+            // Calculate beam opacity based on intensity
+            const intensityFactor = beamIntensity / 100;
+            
+            // Laser beam paths
+            const laserColor = config[currentMode].color;
+            gCtx.strokeStyle = laserColor;
+            gCtx.lineWidth = 3;
+            gCtx.shadowBlur = 15 * intensityFactor;
+            gCtx.shadowColor = laserColor;
+            gCtx.globalAlpha = 0.4 + (0.6 * intensityFactor);
+            
+            // Incoming beam
+            gCtx.beginPath();
+            gCtx.moveTo(cx - armLength * 0.8, cy);
+            gCtx.lineTo(cx, cy);
+            gCtx.stroke();
+            
+            // Reference arm (up)
+            gCtx.strokeStyle = '#6366f1';
+            gCtx.shadowColor = '#6366f1';
+            gCtx.shadowBlur = 12 * intensityFactor;
+            gCtx.beginPath();
+            gCtx.moveTo(cx, cy);
+            gCtx.lineTo(cx, cy - armLength);
+            gCtx.lineTo(cx, cy);
+            gCtx.stroke();
+            
+            // Measurement arm (right)
+            gCtx.strokeStyle = '#f59e0b';
+            gCtx.shadowColor = '#f59e0b';
+            gCtx.shadowBlur = 12 * intensityFactor;
+            gCtx.beginPath();
+            gCtx.moveTo(cx, cy);
+            gCtx.lineTo(cx + armLength + shiftOffset, cy);
+            gCtx.lineTo(cx, cy);
+            gCtx.stroke();
+            
+            // Output beam (interference)
+            gCtx.strokeStyle = laserColor;
+            gCtx.shadowColor = laserColor;
+            gCtx.shadowBlur = 15 * intensityFactor;
+            gCtx.beginPath();
+            gCtx.moveTo(cx, cy);
+            gCtx.lineTo(cx, cy + armLength * 0.6);
+            gCtx.stroke();
+            
+            gCtx.shadowBlur = 0;
+            gCtx.globalAlpha = 1.0;
+            
+            // Distance measurements
+            gCtx.strokeStyle = '#94a3b8';
+            gCtx.lineWidth = 1;
+            gCtx.setLineDash([3, 3]);
+            
+            // Reference arm measurement
+            gCtx.beginPath();
+            gCtx.moveTo(cx + 35, cy);
+            gCtx.lineTo(cx + 35, cy - armLength);
+            gCtx.stroke();
+            
+            // Arrow heads
+            gCtx.setLineDash([]);
+            gCtx.beginPath();
+            gCtx.moveTo(cx + 32, cy - 5);
+            gCtx.lineTo(cx + 35, cy);
+            gCtx.lineTo(cx + 38, cy - 5);
+            gCtx.stroke();
+            gCtx.beginPath();
+            gCtx.moveTo(cx + 32, cy - armLength + 5);
+            gCtx.lineTo(cx + 35, cy - armLength);
+            gCtx.lineTo(cx + 38, cy - armLength + 5);
+            gCtx.stroke();
+            
+            gCtx.font = '9px JetBrains Mono';
+            gCtx.fillStyle = '#94a3b8';
+            gCtx.textAlign = 'left';
+            const refArmCm = (armLength / scaleStep) * cmPerStep;
+            gCtx.fillText(`L₁ = ${refArmCm.toFixed(1)}cm`, cx + 42, cy - armLength / 2);
+            
+            // Measurement arm
+            gCtx.strokeStyle = '#94a3b8';
+            gCtx.setLineDash([3, 3]);
+            gCtx.beginPath();
+            gCtx.moveTo(cx, cy - 35);
+            gCtx.lineTo(cx + armLength + shiftOffset, cy - 35);
+            gCtx.stroke();
+            
+            gCtx.setLineDash([]);
+            gCtx.beginPath();
+            gCtx.moveTo(cx + 5, cy - 32);
+            gCtx.lineTo(cx, cy - 35);
+            gCtx.lineTo(cx + 5, cy - 38);
+            gCtx.stroke();
+            gCtx.beginPath();
+            gCtx.moveTo(cx + armLength + shiftOffset - 5, cy - 32);
+            gCtx.lineTo(cx + armLength + shiftOffset, cy - 35);
+            gCtx.lineTo(cx + armLength + shiftOffset - 5, cy - 38);
+            gCtx.stroke();
+            
+            gCtx.textAlign = 'center';
+            const measArmCm = ((armLength + shiftOffset) / scaleStep) * cmPerStep;
+            gCtx.fillText(`L₂ = ${measArmCm.toFixed(1)}cm`, cx + (armLength + shiftOffset) / 2, cy - 42);
+            
+            // ΔL annotation
+            if (Math.abs(shiftOffset) > 5) {
+                gCtx.fillStyle = '#f59e0b';
+                const deltaL = (pathShift * 0.5).toFixed(2);
+                gCtx.fillText(`ΔL = ${deltaL}${config[currentMode].unit}`, cx + armLength + shiftOffset / 2, cy + 50);
+            }
+            
+            // Labels
+            gCtx.font = '10px JetBrains Mono';
+            gCtx.fillStyle = '#94a3b8';
+            gCtx.textAlign = 'left';
+            gCtx.fillText('Reference', cx - 55, cy - armLength - 10);
+            gCtx.fillText('Measurement', cx + armLength + shiftOffset - 70, cy - 40);
+            gCtx.fillText('Source', cx - armLength * 0.8 - 50, cy - 10);
+            gCtx.fillText('Detector', cx - 30, cy + armLength * 0.6 + 20);
+        }
+
+        // Draw oscilloscope traces
+        function drawOscilloscope() {
+            const width = oscilloscopeCanvas.offsetWidth;
+            const height = oscilloscopeCanvas.offsetHeight;
+            
+            oCtx.clearRect(0, 0, width, height);
+            
+            // Background grid with major and minor divisions
+            const majorGridX = 60;
+            const majorGridY = 40;
+            const minorGridX = 20;
+            const minorGridY = 20;
+            
+            // Minor grid
+            oCtx.strokeStyle = 'rgba(100, 116, 139, 0.05)';
+            oCtx.lineWidth = 1;
+            for (let x = 0; x < width; x += minorGridX) {
+                oCtx.beginPath();
+                oCtx.moveTo(x, 0);
+                oCtx.lineTo(x, height);
+                oCtx.stroke();
+            }
+            for (let y = 0; y < height; y += minorGridY) {
+                oCtx.beginPath();
+                oCtx.moveTo(0, y);
+                oCtx.lineTo(width, y);
+                oCtx.stroke();
+            }
+            
+            // Major grid
+            oCtx.strokeStyle = 'rgba(100, 116, 139, 0.15)';
+            oCtx.lineWidth = 1;
+            for (let x = 0; x < width; x += majorGridX) {
+                oCtx.beginPath();
+                oCtx.moveTo(x, 0);
+                oCtx.lineTo(x, height);
+                oCtx.stroke();
+            }
+            for (let y = 0; y < height; y += majorGridY) {
+                oCtx.beginPath();
+                oCtx.moveTo(0, y);
+                oCtx.lineTo(width, y);
+                oCtx.stroke();
+            }
+            
+            // Time axis labels (horizontal)
+            oCtx.font = '8px JetBrains Mono';
+            oCtx.fillStyle = '#64748b';
+            oCtx.textAlign = 'center';
+            
+            const timePerDiv = 0.5; // microseconds per division
+            let divCount = 0;
+            for (let x = majorGridX; x < width; x += majorGridX) {
+                divCount++;
+                const time = divCount * timePerDiv;
+                oCtx.fillText(`${time}μs`, x, height - 5);
+            }
+            
+            // Voltage axis labels and center lines for each channel
+            const ch1Y = height * 0.25;
+            const ch2Y = height * 0.5;
+            const ch3Y = height * 0.75;
+            
+            // Channel center lines
+            oCtx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+            oCtx.lineWidth = 1;
+            oCtx.setLineDash([5, 5]);
+            
+            oCtx.beginPath();
+            oCtx.moveTo(0, ch1Y);
+            oCtx.lineTo(width, ch1Y);
+            oCtx.stroke();
+            
+            oCtx.beginPath();
+            oCtx.moveTo(0, ch2Y);
+            oCtx.lineTo(width, ch2Y);
+            oCtx.stroke();
+            
+            oCtx.beginPath();
+            oCtx.moveTo(0, ch3Y);
+            oCtx.lineTo(width, ch3Y);
+            oCtx.stroke();
+            
+            oCtx.setLineDash([]);
+            
+            // Voltage scale markers (on the left side)
+            oCtx.textAlign = 'right';
+            oCtx.fillStyle = '#64748b';
+            
+            const voltageScale = 2; // V per division
+            const pixelsPerVolt = 20;
+            
+            // CH1 scale
+            for (let v = -2; v <= 2; v++) {
+                if (v === 0) continue;
+                const y = ch1Y - (v * pixelsPerVolt);
+                oCtx.fillText(`${v}V`, 25, y + 3);
+                oCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+                oCtx.beginPath();
+                oCtx.moveTo(28, y);
+                oCtx.lineTo(35, y);
+                oCtx.stroke();
+            }
+            
+            // CH2 scale
+            for (let v = -2; v <= 2; v++) {
+                if (v === 0) continue;
+                const y = ch2Y - (v * pixelsPerVolt);
+                oCtx.fillText(`${v}V`, 25, y + 3);
+                oCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+                oCtx.beginPath();
+                oCtx.moveTo(28, y);
+                oCtx.lineTo(35, y);
+                oCtx.stroke();
+            }
+            
+            // CH3 scale (doubled for interference)
+            for (let v = -4; v <= 4; v += 2) {
+                if (v === 0) continue;
+                const y = ch3Y - (v * pixelsPerVolt / 2);
+                oCtx.fillText(`${v}V`, 25, y + 3);
+                oCtx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+                oCtx.beginPath();
+                oCtx.moveTo(28, y);
+                oCtx.lineTo(35, y);
+                oCtx.stroke();
+            }
+            
+            // Channel labels
+            oCtx.textAlign = 'left';
+            oCtx.font = '9px JetBrains Mono';
+            oCtx.fillStyle = '#6366f1';
+            oCtx.fillText('CH1: Reference', 40, ch1Y - 45);
+            oCtx.fillStyle = '#f59e0b';
+            oCtx.fillText('CH2: Measurement', 40, ch2Y - 45);
+            oCtx.fillStyle = '#4ade80';
+            oCtx.fillText('CH3: Interference', 40, ch3Y - 45);
+            
+            // Draw waveforms
+            const wavelength = config[currentMode].wavelength;
+            const phase = (pathShift / 90) * Math.PI;
+            const baseAmplitude = 30;
+            const intensityFactor = beamIntensity / 100;
+            const amplitude = baseAmplitude * intensityFactor;
+            
+            // Channel 1: Reference
+            oCtx.strokeStyle = '#6366f1';
+            oCtx.lineWidth = 2;
+            oCtx.shadowBlur = 10 * intensityFactor;
+            oCtx.shadowColor = '#6366f1';
+            oCtx.globalAlpha = 0.5 + (0.5 * intensityFactor);
+            oCtx.beginPath();
+            for (let x = 0; x < width; x++) {
+                const y = ch1Y + Math.sin(x / 25 - animationTime * 4) * amplitude;
+                if (x === 0) oCtx.moveTo(x, y);
+                else oCtx.lineTo(x, y);
+            }
+            oCtx.stroke();
+            
+            // Channel 2: Measurement (phase shifted)
+            oCtx.strokeStyle = '#f59e0b';
+            oCtx.shadowColor = '#f59e0b';
+            oCtx.shadowBlur = 10 * intensityFactor;
+            oCtx.beginPath();
+            for (let x = 0; x < width; x++) {
+                const y = ch2Y + Math.sin(x / 25 - animationTime * 4 + phase) * amplitude;
+                if (x === 0) oCtx.moveTo(x, y);
+                else oCtx.lineTo(x, y);
+            }
+            oCtx.stroke();
+            
+            // Channel 3: Interference pattern
+            const interferenceColor = config[currentMode].color;
+            oCtx.strokeStyle = interferenceColor;
+            oCtx.lineWidth = 3;
+            oCtx.shadowBlur = 15 * intensityFactor;
+            oCtx.shadowColor = interferenceColor;
+            oCtx.beginPath();
+            for (let x = 0; x < width; x++) {
+                const ref = Math.sin(x / 25 - animationTime * 4);
+                const meas = Math.sin(x / 25 - animationTime * 4 + phase);
+                const interference = (ref + meas) * amplitude * 0.7;
+                const y = ch3Y + interference;
+                if (x === 0) oCtx.moveTo(x, y);
+                else oCtx.lineTo(x, y);
+            }
+            oCtx.stroke();
+            
+            oCtx.shadowBlur = 0;
+            oCtx.globalAlpha = 1.0;
+            
+            // Measurement cursors showing phase difference
+            if (Math.abs(phase) > 0.1) {
+                oCtx.strokeStyle = '#ec4899';
+                oCtx.lineWidth = 1;
+                oCtx.setLineDash([3, 3]);
+                
+                // Find two points to measure
+                const x1 = width * 0.3;
+                const x2 = x1 + (phase / (Math.PI * 2)) * 25;
+                
+                if (x2 < width && x2 > 0) {
+                    oCtx.beginPath();
+                    oCtx.moveTo(x1, ch2Y - 50);
+                    oCtx.lineTo(x1, ch2Y + 50);
+                    oCtx.stroke();
+                    
+                    oCtx.beginPath();
+                    oCtx.moveTo(x2, ch2Y - 50);
+                    oCtx.lineTo(x2, ch2Y + 50);
+                    oCtx.stroke();
+                    
+                    // Measurement annotation
+                    oCtx.setLineDash([]);
+                    oCtx.strokeStyle = '#ec4899';
+                    oCtx.beginPath();
+                    oCtx.moveTo(x1, ch2Y + 40);
+                    oCtx.lineTo(x2, ch2Y + 40);
+                    oCtx.stroke();
+                    
+                    // Arrow heads
+                    oCtx.beginPath();
+                    oCtx.moveTo(x1 + 3, ch2Y + 37);
+                    oCtx.lineTo(x1, ch2Y + 40);
+                    oCtx.lineTo(x1 + 3, ch2Y + 43);
+                    oCtx.stroke();
+                    oCtx.beginPath();
+                    oCtx.moveTo(x2 - 3, ch2Y + 37);
+                    oCtx.lineTo(x2, ch2Y + 40);
+                    oCtx.lineTo(x2 - 3, ch2Y + 43);
+                    oCtx.stroke();
+                    
+                    oCtx.fillStyle = '#ec4899';
+                    oCtx.font = '8px JetBrains Mono';
+                    oCtx.textAlign = 'center';
+                    const timeDiff = (Math.abs(phase) / (Math.PI * 2)) * timePerDiv;
+                    oCtx.fillText(`Δt = ${timeDiff.toFixed(3)}μs`, (x1 + x2) / 2, ch2Y + 35);
+                }
+            }
+            
+            oCtx.setLineDash([]);
+        }
+
+        // Update statistics display
+        function updateStats() {
+            const wavelength = config[currentMode].wavelength;
+            const actualPathDiff = pathShift * 0.5;
+            const phase = (pathShift / 90) * Math.PI;
+            const phaseDegrees = (phase * 180 / Math.PI);
+            
+            // Interference intensity: I = I0 * cos²(φ/2)
+            const intensity = Math.pow(Math.cos(phase / 2), 2) * 100;
+            
+            document.getElementById('pathDiffValue').innerHTML = `${actualPathDiff.toFixed(2)}<span class="stat-unit">${config[currentMode].unit}</span>`;
+            document.getElementById('phaseValue').innerHTML = `${phase.toFixed(3)}<span class="stat-unit">rad</span>`;
+            document.getElementById('phaseDegrees').textContent = `${phaseDegrees.toFixed(2)}°`;
+            document.getElementById('powerValue').innerHTML = `${intensity.toFixed(1)}<span class="stat-unit">%</span>`;
+            
+            // Signal state
+            let state = 'INTERMEDIATE';
+            if (intensity > 90) state = 'CONSTRUCTIVE';
+            else if (intensity < 10) state = 'DESTRUCTIVE';
+            document.getElementById('stateValue').textContent = state;
+            
+            // Fringe visibility
+            const visibility = 100;
+            document.getElementById('visibilityValue').innerHTML = `${visibility}<span class="stat-unit">%</span>`;
+            
+            // Coherence length (simplified - infinite for ideal laser)
+            document.getElementById('coherenceValue').innerHTML = `∞<span class="stat-unit"></span>`;
+        }
+
+        // Animation loop
+        function animate() {
+            animationTime += 0.016;
+            
+            drawGeometry();
+            drawOscilloscope();
+            updateStats();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
