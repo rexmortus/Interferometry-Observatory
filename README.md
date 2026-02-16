@@ -49,7 +49,3 @@ git clone https://github.com/username/interferometer-observatory.git
 
 
 2. Open `index.html` in any modern web browser. No dependencies or build steps required.
-
----
-
-Would you like me to add a **save/export** feature to the code so you can download the oscilloscope data as a CSV?
